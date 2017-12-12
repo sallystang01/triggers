@@ -6,7 +6,7 @@ BEGIN
 END
 
 create database JobSearch
-yolo
+
 GO
 USE JobSearch
 
@@ -48,8 +48,7 @@ BusinessType nchar(100)  null,
 Agency bit not null,
 ModifiedDate datetime DEFAULT GETDATE(),
 primary key (CompanyID),
-CONSTRAINT fk_BusinessType FOREIGN KEY (BusinessType)
- REFERENCES Businesstype(businesstype)
+
 )
 
 create INDEX IDX_Companies on COMPANIES(COMPANYID)
@@ -92,8 +91,7 @@ Comments nchar(1000) ,
 Active int ,
 ModifiedDate datetime DEFAULT GETDATE(),
 PRIMARY KEY (ContactID),
-CONSTRAINT fk_CompanyID FOREIGN KEY (CompanyID)
- REFERENCES Companies(CompanyID)
+
 )
 
 
@@ -110,10 +108,10 @@ EmploymentType nchar(50)
 	CONSTRAINT CK_EmploymentType CHECK (EmploymentType IN ('Full Time', 'Part Ttime', 'Temporary')),
 Location nchar(100) ,
 Active bit CONSTRAINT DF_Active DEFAULT (1)  ,
-CompanyID int foreign key references Companies(CompanyID) ,
-AgencyID int foreign key references Companies_1(CompanyID) ,
-ContactID int foreign key references Contacts(ContactID) ,
-SourceID int foreign key references Sources(SourceID),
+CompanyID int  ,
+AgencyID int  ,
+ContactID int  ,
+SourceID int ,
 Selected nchar(20) ,
 ModifiedDate datetime DEFAULT GETDATE(),
 CONSTRAINT CK_ModifiedDate_NoFutureDates CHECK (ModifiedDate <= GETDATE()),
@@ -127,7 +125,7 @@ GO
 create table Activities 
 (
 ActivityID int not null identity (1, 1),
-LeadID int foreign key references leads(LeadID) ,
+LeadID int  ,
 ActivityDate datetime DEFAULT GETDATE(),
 ActivityType nchar(50) ,
 ActivityDetails nchar(50),
@@ -164,10 +162,93 @@ BEGIN
 	
 
 END
-GO
+go
+
+CREATE TRIGGER trgCheckIDLead
+ON activities
+AFTER INSERT, UPDATE
+AS
+	IF EXISTS
+	(
+		SELECT LeadID
+		FROM inserted
+		WHERE LeadID NOT IN (SELECT LeadID FROM Leads)
+	)
+BEGIN	
+RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
+
+END
+go
+
+CREATE TRIGGER dbo.trg_CheckIDcompany
+ON leads
+AFTER INSERT, UPDATE
+AS
+	IF EXISTS
+	(
+		SELECT CompanyID
+		FROM inserted
+		WHERE CompanyID NOT IN (SELECT CompanyID FROM Companies)
+	)
+BEGIN	
+RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
+
+END
+go
+
+CREATE TRIGGER trgCheckIDagency
+ON leads
+AFTER INSERT, UPDATE
+AS
+	IF EXISTS
+	(
+		SELECT AgencyID
+		FROM inserted
+		WHERE AgencyID NOT IN (SELECT AgencyID FROM Companies_1)
+	)
+BEGIN	
+RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
+
+END
+go
+
+CREATE TRIGGER trgCheckIDcontact
+ON leads
+AFTER INSERT, UPDATE
+AS
+	IF EXISTS
+	(
+		SELECT ContactID
+		FROM inserted
+		WHERE ContactID NOT IN (SELECT ContactID FROM Contacts)
+	)
+BEGIN	
+RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
+
+END
+go
+
+CREATE TRIGGER trgCheckIDsource
+ON leads
+AFTER INSERT, UPDATE
+AS
+	IF EXISTS
+	(
+		SELECT SourceID
+		FROM inserted
+		WHERE SourceID NOT IN (SELECT SourceID FROM Companies)
+	)
+BEGIN	
+RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
+
+END
+
+
+
+
 
 CREATE INDEX IDX_ACTIVITIES on ACTIVITIES(ACTIVITYID)
-GO
+
 insert into BusinessType
 (BusinessType)
 values ('BusinessType'),
@@ -271,3 +352,4 @@ values
 (1, 'Application','Filled Out Application', 1),
 (1, 'Interview','Interviewed with Julia', 1)
 
+GO
