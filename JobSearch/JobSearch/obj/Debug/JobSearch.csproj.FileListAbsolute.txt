@@ -1,0 +1,1 @@
+C:\Data\triggers\JobSearch\JobSearch\obj\Debug\JobSearch.csprojResolveAssemblyReference.cache

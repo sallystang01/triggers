@@ -1,3 +1,6 @@
+
+--DELETES CURRENT DATABASE AND REPLACES WITH SCRIPT
+
 USE MASTER
 if (select count(*) 
     from sys.databases where name = 'JobSearch') > 0
@@ -5,12 +8,18 @@ BEGIN
 		DROP DATABASE JobSearch;
 END
 
+--CREATES DATABASE
+
 create database JobSearch
 
 GO
 USE JobSearch
 
+--SETS DATABASE OWNER
+
 exec sp_changedbowner 'sa'
+
+--CREATE TABLE STATEMENTS
 
 create table Sources
 (
@@ -30,7 +39,6 @@ BusinessType nchar(100) not null
 Primary key (BusinessID)
 )
 
-
 create table Companies
 (
 CompanyID int not null identity (1, 1),
@@ -49,14 +57,7 @@ BusinessType int  null,
 Agency bit not null,
 ModifiedDate datetime DEFAULT GETDATE(),
 primary key (CompanyID),
-
 )
-
-create INDEX IDX_Companies on COMPANIES(COMPANYID)
-GO
-
-
-
 
 create table Contacts
 (
@@ -65,21 +66,16 @@ CompanyID int  not null,
 CourtesyTitle nchar(50) ,
 ContactFirstName nchar(50) ,
 ContactLastName nchar(50) ,
-Title nchar(20),
+Title nchar(50),
 Phone nchar(15) ,
 Extension nchar(10),
 Fax nchar(15) ,
-EMail nchar(10) ,
+EMail nchar(50) ,
 Comments nchar(1000) ,
 Active int ,
 ModifiedDate datetime DEFAULT GETDATE(),
 PRIMARY KEY (ContactID),
-
 )
-
-
-CREATE INDEX IDX_CONTACTS on CONTACTS(CONTACTID)
-GO
 
 Create table Leads
 (
@@ -99,11 +95,7 @@ Selected nchar(20) ,
 ModifiedDate datetime DEFAULT GETDATE(),
 CONSTRAINT CK_ModifiedDate_NoFutureDates CHECK (ModifiedDate <= GETDATE()),
 PRIMARY KEY (LeadID)
-
 )
-
-CREATE INDEX IDX_LEADS on LEADS(LEADID)
-GO
 
 create table Activities 
 (
@@ -118,8 +110,20 @@ ModifiedDate datetime DEFAULT GETDATE(),
 PRIMARY KEY (ActivityID)
 )
 GO
+
+--INDEXES
+
+CREATE INDEX IDX_CONTACTS on CONTACTS(CONTACTID)
+GO
+CREATE INDEX IDX_LEADS on LEADS(LEADID)
+GO
 CREATE INDEX IDX_ACTIVITIES on ACTIVITIES(ACTIVITYID)
 GO
+create INDEX IDX_Companies on COMPANIES(COMPANYID)
+GO
+
+--INSERT TRIGGERS
+
 CREATE TRIGGER trgRecordModifyLeads
 ON Leads
 AFTER Insert, UPDATE
@@ -133,7 +137,6 @@ BEGIN
 
 END
 GO
-
 
 CREATE TRIGGER trgRecordModifyActivities
 ON Activities
@@ -180,9 +183,6 @@ RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
 
 END
 go
-
-
-
 
 CREATE TRIGGER trgCheckIDcontact
 ON leads
@@ -232,13 +232,13 @@ RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
 end
 GO
 
+--DELETE TRIGGERS
 
 CREATE TRIGGER TRG_ActivityDelete_main
 ON leads
 AFTER DELETE
 AS
 BEGIN
-
 IF EXISTS(SELECT * 
     FROM deleted i 
     WHERE i.leadID IN (select distinct leadID FROM Activities))
@@ -249,14 +249,11 @@ IF EXISTS(SELECT *
 END
 GO
 
-
-
 CREATE TRIGGER TRG_CompanyDelete
 ON companies
 AFTER DELETE
 AS
 BEGIN
-
 IF EXISTS(SELECT * 
     FROM deleted i 
     WHERE i.companyID IN (select distinct companyID FROM leads))
@@ -272,7 +269,6 @@ ON contacts
 AFTER DELETE
 AS
 BEGIN
-
 IF EXISTS(SELECT * 
     FROM deleted i 
     WHERE i.contactID IN (select distinct ContactID FROM leads))
@@ -288,12 +284,11 @@ ON sources
 AFTER DELETE
 AS
 BEGIN
-
 IF EXISTS(SELECT * 
     FROM deleted i 
     WHERE i.sourceID  in(select distinct sourceID FROM leads))
     BEGIN
-        RAISERROR('Specified CompanyID referenced by Lead records. Record not deleted.',16,1)
+        RAISERROR('Specified SourceID referenced by Lead records. Record not deleted.',16,1)
 		 ROLLBACK TRANSACTION 
   end   
 END
@@ -304,24 +299,21 @@ ON leads
 AFTER DELETE
 AS
 BEGIN
-
 IF EXISTS(SELECT * 
     FROM deleted i 
     WHERE i.sourceID  in(select distinct sourceID FROM sources))
     BEGIN
-        RAISERROR('Specified CompanyID referenced by Lead records. Record not deleted.',16,1)
+        RAISERROR('Specified SourceID referenced by Lead records. Record not deleted.',16,1)
 		 ROLLBACK TRANSACTION 
   end   
 END
 GO
-
 
 CREATE TRIGGER TRG_CompanyDelete_MAIN
 ON leads
 AFTER DELETE
 AS
 BEGIN
-
 IF EXISTS(SELECT * 
     FROM deleted i 
     WHERE i.CompanyID  in(select distinct companyID FROM Companies))
@@ -339,7 +331,6 @@ ON leads
 AFTER DELETE
 AS
 BEGIN
-
 IF EXISTS(SELECT * 
     FROM deleted i 
     WHERE i.ContactID  in(select distinct ContactID FROM Contacts))
@@ -357,12 +348,11 @@ ON companies
 AFTER DELETE
 AS
 BEGIN
-
 IF EXISTS(SELECT * 
     FROM deleted i 
     WHERE i.BusinessType IN (select distinct businessID FROM BusinessTypes))
     BEGIN
-        RAISERROR('Specified LeadID referenced by Activity records. Record not deleted.',16,1)
+        RAISERROR('Specified businesstype referenced by BuisinessType records. Record not deleted.',16,1)
 		 ROLLBACK TRANSACTION 
   end   
 END
@@ -373,12 +363,11 @@ ON businesstypes
 AFTER DELETE
 AS
 BEGIN
-
 IF EXISTS(SELECT * 
     FROM deleted i 
     WHERE i.BusinessID IN (select distinct BusinessType FROM Companies))
     BEGIN
-        RAISERROR('Specified LeadID referenced by Activity records. Record not deleted.',16,1)
+        RAISERROR('Specified BusinessID referenced by Company records. Record not deleted.',16,1)
 		 ROLLBACK TRANSACTION 
   end   
 END
