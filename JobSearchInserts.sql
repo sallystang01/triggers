@@ -1,13 +1,121 @@
 use JobSearch
 
+
+insert into BusinessTypes
+(BusinessType)
+values 
+('Accounting'),
+('Advertising/Marketing'),
+('Agriculture'),
+('Architecture'),
+('Arts/Entertainment'),
+('Aviation'),
+('Beauty/Fitness'),
+('Business Services'),
+('Communications'),
+('Computer/Hardware'),
+('Computer/Services'),
+('Computer/Software'),
+('Computer/Training'),
+('Construction'),
+('Consulting'),
+('Crafts/Hobbies'),
+('Education'),
+('Electrical'),
+('Electronics'),
+('Employment'),
+('Engineering'),
+('Environmental'),
+('Fashion'),
+('Financial'),
+('Food/Beverage'),
+('Government'),
+('Health/Medicine'),
+('Home & Garden'),
+('Immigration'),
+('Import/Export'),
+('Industrial'),
+('Industrial Medicine'),
+('Information Services'),
+('Insurance'),
+('Internet'),
+('Legal & Law'),
+('Logistics'),
+('Manufacturing'),
+('Mapping/Surveying'),
+('Marine/Maritime'),
+('Motor Vehicle'),
+('Multimedia'),
+('Network Marketing'),
+('News & Weather'),
+('Non-Profit'),
+('Petrochemical'),
+('Pharmaceutical'),
+('Printing/Publishing'),
+('Real Estate'),
+('Restaurants'),
+('Restaurants Services'),
+('Service Clubs'),
+('Service Industry'),
+('Shopping/Retail'),
+('Spiritual/Religious'),
+('Sports/Recreation'),
+('Storage/Warehousing'),
+('Technologies'),
+('Transportation'),
+('Travel'),
+('Utilities'),
+('Venture Capital'),
+('Wholesale')
+
+
+
+insert into Companies
+(CompanyName, Address1, City, [State], ZIP, Phone, BusinessType, Agency)
+values ('Mccall Technology Group', '238 NE 13th St,', 'Ocala', 'Florida','34471', '(352) 369-1600', 58, '0'),
+('Moy Media', '36 SE Magnolia Exd Ste 200-300', 'Ocala', 'Florida','34471', '(352) 867-0221', 58, '0'),
+('PNC Financial Services', ' 716 E Silver Springs Blvd', 'Ocala', 'Florida','34471', '(352) 732-5141', 58, '0')
+
+
+
+
+insert into Sources
+(SourceName, SourceType)
+values
+ ('Roddy Tatom', 'Friend'),
+ ('Indeed', 'Wesbite')
+
+insert into Contacts
+(CompanyID,Title, ContactFirstName, ContactLastName, Phone, Active)
+values
+		 (1, 'Public Relations', 'Julia', 'Smith', '352-888-1212', 1),
+		(2, 'Human-Resources', 'Alex', 'Brown', '352-838-1242', 1)
+
+insert into Leads
+(JobTitle, JobDescription, EmploymentType, Location, Active, CompanyID, ContactID, SourceID, Selected)
+
+values
+('Programming Assistant','Programming Websites and Databases','Full Time', 'Ocala', 1, 1, 1, 1, 'Undetermined'),
+		('Website Developer','Developing Websites','Full Time', 'Ocala', 1, 2, 2, 2, 'Undetermined')
+
+insert into Activities
+(LeadID, ActivityType, ActivityDetails, Complete)
+values 
+(1, 'Application','Filled Out Application', 1),
+(1, 'Interview','Interviewed with Julia', 1)
+
+
+
+
+
 insert into Companies
 (CompanyName, Address1, Address2,city, [State], ZIP, Phone, Website, JobDescription, BusinessType, Agency)
-values ('Kavaliro', '12001 Research Pkwy', '#344', 'Orlando', 'Florida', '32826', '(407) 243-6006', 'https://kavaliro.com/', 'Java Middle Tier/Back-End Developer', 'Technologies', 0)
+values ('Kavaliro', '12001 Research Pkwy', '#344', 'Orlando', 'Florida', '32826', '(407) 243-6006', 'https://kavaliro.com/', 'Java Middle Tier/Back-End Developer', 58, 0)
 
 insert into companies
 (CompanyName, Address1,Address2, City, [State], ZIP, Phone, Website, JobDescription, BusinessType, Agency)
 values ('Florida Dept of Children and Families Careers', '1389 W US Hwy 90', '#110', 'Lake City', 'Florida', '32055', '(866) 762-2237',
-'http://www.myflorida.com/accessflorida/', 'Computer Programmer Analyst II', 'Technologies', 0)
+'http://www.myflorida.com/accessflorida/', 'Computer Programmer Analyst II', 58, 0)
 		
 
 

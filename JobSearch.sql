@@ -23,10 +23,11 @@ primary key (SourceID)
 
 )
 
-Create table BusinessType
+Create table BusinessTypes
 (
+BusinessID int not null identity (1, 1),
 BusinessType nchar(100) not null 
-Primary key (BusinessType)
+Primary key (BusinessID)
 )
 
 
@@ -44,7 +45,7 @@ Fax nchar(15) null,
 EMail nchar(50)  null,
 Website nchar(100) null,
 JobDescription nchar(1000) null,
-BusinessType nchar(100)  null,
+BusinessType int  null,
 Agency bit not null,
 ModifiedDate datetime DEFAULT GETDATE(),
 primary key (CompanyID),
@@ -56,24 +57,6 @@ GO
 
 
 
-create table Companies_1
-(
-CompanyID int not null identity (1, 1),
-CompanyName nchar(100) not null,
-Address1 nchar(50) not null,
-Address2 nchar(50) null,
-City nchar(50) not null,
-[State] nchar(50) not null,
-ZIP nchar(20) not null,
-Phone nchar(15) not null,
-Fax nchar(15) null,
-EMail nchar(50) not null,
-Website nchar(100) null,
-Description nchar(1000) null,
-BusinessType nchar(100) null,
-Agency bit not null
-primary key (CompanyID)
-)
 
 create table Contacts
 (
@@ -134,6 +117,8 @@ ReferenceLink nchar(255) ,
 ModifiedDate datetime DEFAULT GETDATE(),
 PRIMARY KEY (ActivityID)
 )
+GO
+CREATE INDEX IDX_ACTIVITIES on ACTIVITIES(ACTIVITYID)
 GO
 CREATE TRIGGER trgRecordModifyLeads
 ON Leads
@@ -196,21 +181,8 @@ RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
 END
 go
 
-CREATE TRIGGER trgCheckIDagency
-ON leads
-AFTER INSERT, UPDATE
-AS
-	IF EXISTS
-	(
-		SELECT AgencyID
-		FROM inserted
-		WHERE AgencyID NOT IN (SELECT AgencyID FROM Companies_1)
-	)
-BEGIN	
-RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
 
-END
-go
+
 
 CREATE TRIGGER trgCheckIDcontact
 ON leads
@@ -241,115 +213,142 @@ AS
 BEGIN	
 RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
 
-END
-
-
-
-
-
-CREATE INDEX IDX_ACTIVITIES on ACTIVITIES(ACTIVITYID)
-
-insert into BusinessType
-(BusinessType)
-values ('BusinessType'),
-('Accounting'),
-('Advertising/Marketing'),
-('Agriculture'),
-('Architecture'),
-('Arts/Entertainment'),
-('Aviation'),
-('Beauty/Fitness'),
-('Business Services'),
-('Communications'),
-('Computer/Hardware'),
-('Computer/Services'),
-('Computer/Software'),
-('Computer/Training'),
-('Construction'),
-('Consulting'),
-('Crafts/Hobbies'),
-('Education'),
-('Electrical'),
-('Electronics'),
-('Employment'),
-('Engineering'),
-('Environmental'),
-('Fashion'),
-('Financial'),
-('Food/Beverage'),
-('Government'),
-('Health/Medicine'),
-('Home & Garden'),
-('Immigration'),
-('Import/Export'),
-('Industrial'),
-('Industrial Medicine'),
-('Information Services'),
-('Insurance'),
-('Internet'),
-('Legal & Law'),
-('Logistics'),
-('Manufacturing'),
-('Mapping/Surveying'),
-('Marine/Maritime'),
-('Motor Vehicle'),
-('Multimedia'),
-('Network Marketing'),
-('News & Weather'),
-('Non-Profit'),
-('Petrochemical'),
-('Pharmaceutical'),
-('Printing/Publishing'),
-('Real Estate'),
-('Restaurants'),
-('Restaurants Services'),
-('Service Clubs'),
-('Service Industry'),
-('Shopping/Retail'),
-('Spiritual/Religious'),
-('Sports/Recreation'),
-('Storage/Warehousing'),
-('Technologies'),
-('Transportation'),
-('Travel'),
-('Utilities'),
-('Venture Capital'),
-('Wholesale')
-
-
-
-insert into Companies
-(CompanyName, Address1, City, [State], ZIP, Phone, BusinessType, Agency)
-values ('Mccall Technology Group', '238 NE 13th St,', 'Ocala', 'Florida','34471', '(352) 369-1600', 'Technologies', '0'),
-('Moy Media', '36 SE Magnolia Exd Ste 200-300', 'Ocala', 'Florida','34471', '(352) 867-0221', 'Technologies', '0'),
-('PNC Financial Services', ' 716 E Silver Springs Blvd', 'Ocala', 'Florida','34471', '(352) 732-5141', 'Technologies', '0')
-
-
-
-
-insert into Sources
-(SourceName, SourceType)
-values
- ('Roddy Tatom', 'Friend'),
- ('Indeed', 'Wesbite')
-
-insert into Contacts
-(CompanyID,Title, ContactFirstName, ContactLastName, Phone, Active)
-values
-		 (1, 'Public Relations', 'Julia', 'Smith', '352-888-1212', 1),
-		(2, 'Human-Resources', 'Alex', 'Brown', '352-838-1242', 1)
-
-insert into Leads
-(JobTitle, JobDescription, EmploymentType, Location, Active, CompanyID, ContactID, SourceID, Selected)
-
-values
-('Programming Assistant','Programming Websites and Databases','Full Time', 'Ocala', 1, 1, 1, 1, 'Undetermined'),
-		('Website Developer','Developing Websites','Full Time', 'Ocala', 1, 2, 2, 2, 'Undetermined')
-
-insert into Activities
-(LeadID, ActivityType, ActivityDetails, Complete)
-values 
-(1, 'Application','Filled Out Application', 1),
-(1, 'Interview','Interviewed with Julia', 1)
-
+end
 GO
+
+CREATE TRIGGER trgCheckIDBusiness
+ON companies
+AFTER INSERT, UPDATE
+AS
+	IF EXISTS
+	(
+		SELECT BusinessType
+		FROM inserted
+		WHERE BusinessType NOT IN (SELECT BusinessID FROM BusinessTypes)
+	)
+BEGIN	
+RAISERROR ('This is not a valid ID. Please enter a valid ID to continue.', 16,1)
+
+end
+GO
+
+
+CREATE TRIGGER TRG_ActivityDelete_main
+ON leads
+AFTER DELETE
+AS
+BEGIN
+
+IF EXISTS(SELECT * 
+    FROM deleted i 
+    WHERE i.leadID IN (select distinct leadID FROM Activities))
+    BEGIN
+        RAISERROR('Specified LeadID referenced by Activity records. Record not deleted.',16,1)
+		 ROLLBACK TRANSACTION 
+  end   
+END
+GO
+
+
+
+CREATE TRIGGER TRG_CompanyDelete
+ON companies
+AFTER DELETE
+AS
+BEGIN
+
+IF EXISTS(SELECT * 
+    FROM deleted i 
+    WHERE i.companyID IN (select distinct companyID FROM leads))
+    BEGIN
+        RAISERROR('Specified CompanyID referenced by Lead records. Record not deleted.',16,1)
+		 ROLLBACK TRANSACTION 
+  end   
+END
+GO
+
+CREATE TRIGGER TRG_DeleteContact
+ON contacts
+AFTER DELETE
+AS
+BEGIN
+
+IF EXISTS(SELECT * 
+    FROM deleted i 
+    WHERE i.contactID IN (select distinct ContactID FROM leads))
+    BEGIN
+        RAISERROR('Specified ContactID referenced by Lead records. Record not deleted.',16,1)
+		 ROLLBACK TRANSACTION 
+  end   
+END
+GO
+
+CREATE TRIGGER TRG_SourceDelete
+ON sources
+AFTER DELETE
+AS
+BEGIN
+
+IF EXISTS(SELECT * 
+    FROM deleted i 
+    WHERE i.sourceID  in(select distinct sourceID FROM leads))
+    BEGIN
+        RAISERROR('Specified CompanyID referenced by Lead records. Record not deleted.',16,1)
+		 ROLLBACK TRANSACTION 
+  end   
+END
+GO
+
+CREATE TRIGGER TRG_SourceDelete_MAIN
+ON leads
+AFTER DELETE
+AS
+BEGIN
+
+IF EXISTS(SELECT * 
+    FROM deleted i 
+    WHERE i.sourceID  in(select distinct sourceID FROM sources))
+    BEGIN
+        RAISERROR('Specified CompanyID referenced by Lead records. Record not deleted.',16,1)
+		 ROLLBACK TRANSACTION 
+  end   
+END
+GO
+
+
+CREATE TRIGGER TRG_CompanyDelete_MAIN
+ON leads
+AFTER DELETE
+AS
+BEGIN
+
+IF EXISTS(SELECT * 
+    FROM deleted i 
+    WHERE i.CompanyID  in(select distinct companyID FROM Companies))
+    BEGIN
+       
+	   RAISERROR('Specified CompanyID referenced by Lead records. Record not deleted.',16,1)
+   ROLLBACK TRANSACTION 
+  end 
+    
+END
+GO
+
+CREATE TRIGGER TRG_ContactDelete_MAIN
+ON leads
+AFTER DELETE
+AS
+BEGIN
+
+IF EXISTS(SELECT * 
+    FROM deleted i 
+    WHERE i.ContactID  in(select distinct ContactID FROM Contacts))
+    BEGIN
+       
+	   RAISERROR('Specified CompanyID referenced by Lead records. Record not deleted.',16,1)
+   ROLLBACK TRANSACTION 
+  end 
+    
+END
+GO
+
