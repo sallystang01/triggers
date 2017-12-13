@@ -352,3 +352,34 @@ IF EXISTS(SELECT *
 END
 GO
 
+CREATE TRIGGER TRG_CompanyDelete_BTmain
+ON companies
+AFTER DELETE
+AS
+BEGIN
+
+IF EXISTS(SELECT * 
+    FROM deleted i 
+    WHERE i.BusinessType IN (select distinct businessID FROM BusinessTypes))
+    BEGIN
+        RAISERROR('Specified LeadID referenced by Activity records. Record not deleted.',16,1)
+		 ROLLBACK TRANSACTION 
+  end   
+END
+GO
+
+CREATE TRIGGER TRG_CompanyDelete_BTmain_01
+ON businesstypes
+AFTER DELETE
+AS
+BEGIN
+
+IF EXISTS(SELECT * 
+    FROM deleted i 
+    WHERE i.BusinessID IN (select distinct BusinessType FROM Companies))
+    BEGIN
+        RAISERROR('Specified LeadID referenced by Activity records. Record not deleted.',16,1)
+		 ROLLBACK TRANSACTION 
+  end   
+END
+GO
