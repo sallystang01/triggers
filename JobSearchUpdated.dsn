@@ -1,0 +1,8 @@
+[ODBC]
+DRIVER=SQL Server
+UID=Cyberadmin
+DATABASE=JobSearch
+WSID=PL09
+APP=Microsoft® Windows® Operating System
+Trusted_Connection=Yes
+SERVER=PL09\MTCDB
