@@ -184,15 +184,15 @@ END
 
 
 
-create database Homework
+create database Homework;
 GO
 	PRINT 'DATABASE CREATED'
 
-USE Homework
-	PRINT 'Using Homework Database'
+USE Homework;
+	PRINT 'Using Homework Database';
 
-exec sp_changedbowner 'sa'
-	PRINT 'Congratulations! You are now the owner of the Homework database'
+exec sp_changedbowner 'sa';
+	PRINT 'Congratulations! You are now the owner of the Homework database';
 
 CREATE TABLE Countries
 (
@@ -201,8 +201,8 @@ CountryName VARCHAR(50), --(Indexed)
 [Population] BIGINT,  
 Currency VARCHAR(50), 
 CONSTRAINT [PK_Country] PRIMARY KEY (CountryID)
-)
-	PRINT 'Table "Countries" Created!'
+);
+	PRINT 'Table "Countries" Created!';
 
 CREATE TABLE Cities
 
@@ -211,9 +211,9 @@ CityName VARCHAR(50), --(Indexed)
 CountryID INT NOT NULL, --(Indexed)
 [Population] BIGINT
 PRIMARY KEY (CityID)
- )
+ );
 
-	PRINT 'Table "Cities" Created!'
+	PRINT 'Table "Cities" Created!';
 
 CREATE TABLE Books
 (
@@ -222,35 +222,35 @@ DatePurchased DATE,
 Title VARCHAR(255), --(Indexed)
 AuthorID INT --(Indexed)
 CONSTRAINT PK_Books PRIMARY KEY NONCLUSTERED (ISBN, DatePurchased)
-)
+);
 
-	PRINT 'Table "Books" Created!'
+	PRINT 'Table "Books" Created!';
 ALTER TABLE Books
-DROP  CONSTRAINT PK_Books
+DROP  CONSTRAINT PK_Books;
  
-	PRINT 'Table "Books" Altered!'
+	PRINT 'Table "Books" Altered!';
 
 ALTER TABLE Books
 
 ADD
 BookID INT NOT NULL IDENTITY(1, 1)
-CONSTRAINT PK_BooksID PRIMARY KEY (BookID)
+CONSTRAINT PK_BooksID PRIMARY KEY (BookID);
 
 
 
-	PRINT 'Table "Books" Altered!'
+	PRINT 'Table "Books" Altered!';
 
 --select *
 --from 
 --sys.key_constraints
 --where name = 'PK_BooksID'
 
-	PRINT 'Primary Key "PK_BooksID" Found!'
+	PRINT 'Primary Key "PK_BooksID" Found!';
 
 ALTER TABLE Cities
-ADD CONSTRAINT FK_CountryID FOREIGN KEY (CountryID) REFERENCES Countries(CountryID) ON DELETE CASCADE
+ADD CONSTRAINT FK_CountryID FOREIGN KEY (CountryID) REFERENCES Countries(CountryID) ON DELETE CASCADE;
 	
-	PRINT 'Table "Cities" Modified!'
+	PRINT 'Table "Cities" Modified!';
 
 --INSERT STATEMENTS
 --COUNTRIES
@@ -258,9 +258,9 @@ INSERT INTO Countries
 (CountryName, [Population], Currency)
 VALUES ('United States', '323100000000', 'USD'),
 		('England', '531000000', 'GBD'),
-		('Italy', '60600000', 'EU')
+		('Italy', '60600000', 'EU');
 
-	PRINT 'Table "Countries" Populated!'
+	PRINT 'Table "Countries" Populated!';
 
 --CITIES
 
@@ -268,28 +268,28 @@ INSERT INTO Cities
 (CityName, CountryID, [Population])
 Values ('New York', 1, '8538000'),
 		('London', 2, '8780000'),
-		('Rome', 3, '2868000')
+		('Rome', 3, '2868000');
 
-	PRINT 'Table "Cities" Populated!'
+	PRINT 'Table "Cities" Populated!';
 --BOOKS
 
 INSERT INTO Books
 (ISBN, DatePurchased, Title)
 Values ('1259587541', GETDATE(), 'Practical Electronics for Inventors, Fourth Edition'),
 		('1259587401', GETDATE(), 'Programming the Raspberry Pi, Second Edition: Getting Started with Python'),
-		('1608196704', GETDATE(), 'The Doomsday Machine: Confessions of a Nuclear War Planner')
+		('1608196704', GETDATE(), 'The Doomsday Machine: Confessions of a Nuclear War Planner');
 
 		
-	PRINT 'Table "Books" Populated!'
+	PRINT 'Table "Books" Populated!';
 
 UPDATE Countries
-SET [Population] = [Population] * 1.15
+SET [Population] = [Population] * 1.15;
 
-	PRINT 'Population Increase!'
+	PRINT 'Population Increase!';
 
 UPDATE Cities
-SET [Population] = [Population] * 1.15
+SET [Population] = [Population] * 1.15;
 	
-	PRINT 'Population Increase!'
-
+	PRINT 'Population Increase!';
+	
 
