@@ -113,7 +113,7 @@ How do you disable and re-enable foreign keys on a table?
 What is the name of the system view used to view information on all primary and 
 foreign keys in the database?
 
-
+sys.key_constraints
 
 SQL Exercise
 
@@ -122,6 +122,7 @@ The script must run a single time without error.  Use comments and the PRINT sta
 indicate each step in the script.
 
 Create a new database called Homework and run the rest of the commands in that database.
+
 
 Create the Countries table with the following fields:
 
@@ -172,4 +173,123 @@ cities you've added by 15%.
 
 
 */
+
+USE MASTER
+if (select count(*) 
+    from sys.databases where name = 'Homework') > 0
+BEGIN
+		DROP DATABASE Homework;
+END
+
+
+
+
+create database Homework
+GO
+	PRINT 'DATABASE CREATED'
+
+USE Homework
+	PRINT 'Using Homework Database'
+
+exec sp_changedbowner 'sa'
+	PRINT 'Congratulations! You are now the owner of the Homework database'
+
+CREATE TABLE Countries
+(
+CountryID INT NOT NULL IDENTITY (1, 1),
+CountryName VARCHAR(50), --(Indexed)
+[Population] BIGINT,  
+Currency VARCHAR(50), 
+CONSTRAINT [PK_Country] PRIMARY KEY (CountryID)
+)
+	PRINT 'Table "Countries" Created!'
+
+CREATE TABLE Cities
+
+(CityID INT NOT NULL IDENTITY (1,1), 
+CityName VARCHAR(50), --(Indexed)
+CountryID INT NOT NULL, --(Indexed)
+[Population] BIGINT
+PRIMARY KEY (CityID)
+ )
+
+	PRINT 'Table "Cities" Created!'
+
+CREATE TABLE Books
+(
+ISBN VARCHAR(15) NOT NULL,
+DatePurchased DATE, 
+Title VARCHAR(255), --(Indexed)
+AuthorID INT --(Indexed)
+CONSTRAINT PK_Books PRIMARY KEY NONCLUSTERED (ISBN, DatePurchased)
+)
+
+	PRINT 'Table "Books" Created!'
+ALTER TABLE Books
+DROP  CONSTRAINT PK_Books
+ 
+	PRINT 'Table "Books" Altered!'
+
+ALTER TABLE Books
+
+ADD
+BookID INT NOT NULL IDENTITY(1, 1)
+CONSTRAINT PK_BooksID PRIMARY KEY (BookID)
+
+
+
+	PRINT 'Table "Books" Altered!'
+
+--select *
+--from 
+--sys.key_constraints
+--where name = 'PK_BooksID'
+
+	PRINT 'Primary Key "PK_BooksID" Found!'
+
+ALTER TABLE Cities
+ADD CONSTRAINT FK_CountryID FOREIGN KEY (CountryID) REFERENCES Countries(CountryID) ON DELETE CASCADE
+	
+	PRINT 'Table "Cities" Modified!'
+
+--INSERT STATEMENTS
+--COUNTRIES
+INSERT INTO Countries
+(CountryName, [Population], Currency)
+VALUES ('United States', '323100000000', 'USD'),
+		('England', '531000000', 'GBD'),
+		('Italy', '60600000', 'EU')
+
+	PRINT 'Table "Countries" Populated!'
+
+--CITIES
+
+INSERT INTO Cities
+(CityName, CountryID, [Population])
+Values ('New York', 1, '8538000'),
+		('London', 2, '8780000'),
+		('Rome', 3, '2868000')
+
+	PRINT 'Table "Cities" Populated!'
+--BOOKS
+
+INSERT INTO Books
+(ISBN, DatePurchased, Title)
+Values ('1259587541', GETDATE(), 'Practical Electronics for Inventors, Fourth Edition'),
+		('1259587401', GETDATE(), 'Programming the Raspberry Pi, Second Edition: Getting Started with Python'),
+		('1608196704', GETDATE(), 'The Doomsday Machine: Confessions of a Nuclear War Planner')
+
+		
+	PRINT 'Table "Books" Populated!'
+
+UPDATE Countries
+SET [Population] = [Population] * 1.15
+
+	PRINT 'Population Increase!'
+
+UPDATE Cities
+SET [Population] = [Population] * 1.15
+	
+	PRINT 'Population Increase!'
+
 
